@@ -4,8 +4,8 @@ SITE_NAME="devilindetails.com"
 NGINX_PATH="/usr/local/nginx/conf"
 PYTHON="/usr/local/bin/pthon3.10"
 
-mv /usr/local/nginx/conf /usr/local/nginx/conf.old
-git clone https://github.com/vunovikov/Nginx_Configuration.git /usr/local/nginx/conf
+[[ -d ${NGINX_PATH} ]] && mv "${NGINX_PATH}" "${NGINX_PATH}.old"
+git clone https://github.com/vunovikov/Nginx_Configuration.git "${NGINX_PATH}"
 rm -rf /usr/local/nginx/conf/.git
 
 grep -q certbot <($PYTHON -m pip list) || $PYTHON -m pip install certbot
