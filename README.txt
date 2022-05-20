@@ -1,38 +1,42 @@
-SITE_NAME="webpsycholog.com"
-python3.10 -m pip install certbot
-[[ -d /usr/local/nginx/html/webpsycholog.com ]] || mkdir -p /usr/local/nginx/html/webpsycholog.com/_letsencrypt
-chown -R nginx:nginx /usr/local/nginx/html/webpsycholog.com
+#!/usr/bin/env bash
 
-cp /usr/local/nginx/conf/conf.d/example.com.conf.default /usr/local/nginx/conf/conf.d/webpsycholog.com.conf
-sed -i -r 's/example\.com/webpsycholog\.com/g' /usr/local/nginx/conf/conf.d/webpsycholog.com.conf
+SITE_NAME="devilindetails.com"
+NGINX_PATH="/usr/local/nginx/conf"
+PYTHON="/usr/local/bin/pthon3.10"
 
-Сгенерируйте ключи Диффи-Хеллмана, запустив следующую команду на своем сервере:
-    openssl dhparam -dsaparam -out /usr/local/nginx/conf/dhparam.pem 4096
-Закомментируйте директивы, связанные с SSL в конфигурации:
-    sed -i -r 's/(listen .*443)/\1; #/g; s/(ssl_(certificate|certificate_key|trusted_certificate) )/#;#\1/g; s/(server \{)/\1\n    ssl off;/g' /usr/local/nginx/conf/conf.d/webpsycholog.com.conf
-Перезагрузите свой NGINX сервер:
-    sudo nginx -t && sudo systemctl reload nginx
-Получите SSL сертификат Let's Encrypt используя Certbot:
-    /usr/local/bin/certbot certonly --webroot -d webpsycholog.com -d www.webpsycholog.com --email vunovikov@outlook.com -w /usr/local/nginx/html/webpsycholog.com/_letsencrypt -n --agree-tos --force-renewal
-Раскомментируйте директивы, связанные с SSL в конфигурации:
-    sed -i -r -z 's/#?; ?#//g; s/(server \{)\n    ssl off;/\1/g' /usr/local/nginx/conf/conf.d/webpsycholog.com.conf
-Перезагрузите свой NGINX сервер:
-    sudo nginx -t && sudo systemctl reload nginx
-Настройте Certbot, чтобы перезагрузить NGINX, когда сертификаты успешно обновятся:
-    echo -e '#!/bin/bash\nnginx -t && systemctl reload nginx' | sudo tee /etc/letsencrypt/renewal-hooks/post/nginx-reload.sh
-    sudo chmod a+x /etc/letsencrypt/renewal-hooks/post/nginx-reload.sh
+mv /usr/local/nginx/conf /usr/local/nginx/conf.old
+git clone https://github.com/vunovikov/Nginx_Configuration.git /usr/local/nginx/conf
+rm -rf /usr/local/nginx/conf/.git
 
-git clone https://github.com/certbot/certbot /usr/local/certbot
-git pull
+grep -q certbot <($PYTHON -m pip list) || $PYTHON -m pip install certbot
 
+[[ -d "/usr/local/nginx/html/${SITE_NAME}" ]] || mkdir -p "/usr/local/nginx/html/${SITE_NAME}/_letsencrypt"
+chown -R nginx:nginx "/usr/local/nginx/html/${SITE_NAME}"
 
-podman run -it --rm --name certbot \
--v "/etc/letsencrypt:/etc/letsencrypt" \
--v "/var/lib/letsencrypt:/var/lib/letsencrypt" \
-certbot/certbot help
+cp /usr/local/nginx/conf/conf.d/example.com.conf.default "/usr/local/nginx/conf/conf.d/${SITE_NAME}.conf"
+sed -i -r "s/example\.com/${SITE_NAME}/g" "/usr/local/nginx/conf/conf.d/${SITE_NAME}.conf"
 
+# Сгенерируйте ключи Диффи-Хеллмана, запустив следующую команду на своем сервере:
+openssl dhparam -dsaparam -out /usr/local/nginx/conf/dhparam.pem 4096
 
+# Закомментируйте директивы, связанные с SSL в конфигурации:
+sed -i -r 's/(listen .*443)/\1; #/g; s/(ssl_(certificate|certificate_key|trusted_certificate) )/#;#\1/g; s/(server \{)/\1\n    ssl off;/g' "/usr/local/nginx/conf/conf.d/${SITE_NAME}.conf"
+# Перезагрузите свой NGINX сервер:
+/usr/local/nginx/sbin/nginx -t && sudo systemctl reload nginx
 
+# Получите SSL сертификат Let's Encrypt используя Certbot:
+/usr/local/bin/certbot certonly --webroot -d "${SITE_NAME}" -d "www.${SITE_NAME}" --email vunovikov@outlook.com -w "/usr/local/nginx/html/${SITE_NAME}/_letsencrypt" -n --agree-tos --force-renewal
 
+# Раскомментируйте директивы, связанные с SSL в конфигурации:
+sed -i -r -z 's/#?; ?#//g; s/(server \{)\n    ssl off;/\1/g' "/usr/local/nginx/conf/conf.d/${SITE_NAME}.conf"
 
-podman catatonit conmon container-selinux containernetworking-plugins containers-common criu dnsmasq fuse fuse-overlayfs fuse3 fuse3-libs libnet libnftnl libslirp nftables podman-plugins protobuf-c runc slirp4netns
+# Перезагрузите свой NGINX сервер:
+/usr/local/nginx/sbin/nginx -t && sudo systemctl reload nginx
+
+# Настройте Certbot, чтобы перезагрузить NGINX, когда сертификаты успешно обновятся:
+{
+    echo '#!/usr/bin/env bash'
+    echo '/usr/local/nginx/sbin/nginx -t && systemctl reload nginx'
+} > /etc/letsencrypt/renewal-hooks/post/nginx-reload.sh
+
+chmod a+x /etc/letsencrypt/renewal-hooks/post/nginx-reload.sh
