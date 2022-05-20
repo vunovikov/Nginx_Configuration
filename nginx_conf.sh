@@ -3,13 +3,13 @@
 SITE_NAME="devilindetails.com"
 EMAIL="vunovikov@outlook.com"
 NGINX_PATH="/usr/local/nginx"
-PYTHON="/usr/local/bin/python3.10"
+#PYTHON="/usr/local/bin/python3.10"
 
-[[ -d "${NGINX_PATH}/conf" ]] && mv "${NGINX_PATH}/conf" "${NGINX_PATH}/conf.old"
-git clone https://github.com/vunovikov/Nginx_Configuration.git "${NGINX_PATH}/conf"
-rm -rf "${NGINX_PATH}/conf/.git"
+#[[ -d "${NGINX_PATH}/conf" ]] && mv "${NGINX_PATH}/conf" "${NGINX_PATH}/conf.old"
+#git clone https://github.com/vunovikov/Nginx_Configuration.git "${NGINX_PATH}/conf"
+#rm -rf "${NGINX_PATH}/conf/.git"
 
-grep -q certbot <($PYTHON -m pip list) || $PYTHON -m pip install certbot
+#grep -q certbot <($PYTHON -m pip list) || $PYTHON -m pip install certbot
 
 [[ -d "${NGINX_PATH}/html/${SITE_NAME}" ]] || mkdir -p "${NGINX_PATH}/html/${SITE_NAME}/_letsencrypt"
 chown -R nginx:nginx "${NGINX_PATH}/html/${SITE_NAME}"
@@ -26,7 +26,7 @@ sed -i -r 's/(listen .*443)/\1; #/g; s/(ssl_(certificate|certificate_key|trusted
 ${NGINX_PATH}/sbin/nginx -t && systemctl reload nginx
 
 # Получите SSL сертификат Let's Encrypt используя Certbot:
-/usr/local/bin/certbot certonly --dry-run --webroot -d "${SITE_NAME}" -d "www.${SITE_NAME}" --email "${EMAIL}" -w "${NGINX_PATH}/html/${SITE_NAME}/_letsencrypt" -n --agree-tos --force-renewal
+/usr/local/bin/certbot certonly --webroot -d "${SITE_NAME}" -d "www.${SITE_NAME}" --email "${EMAIL}" -w "${NGINX_PATH}/html/${SITE_NAME}/_letsencrypt" -n --agree-tos --force-renewal
 
 # Раскомментируйте директивы, связанные с SSL в конфигурации:
 sed -i -r -z 's/#?; ?#//g; s/(server \{)\n    ssl off;/\1/g' "${NGINX_PATH}/conf/conf.d/${SITE_NAME}.conf"
