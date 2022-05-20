@@ -2,7 +2,7 @@ server {
     listen                  443 ssl http2 reuseport;
     listen                  [::]:443 ssl http2 reuseport;
     server_name             example.com;
-    set                     $base /usr/share/nginx/html;
+    set                     $base /usr/local/nginx/html;
     root                    $base/example.com;
 
     # SSL
@@ -14,8 +14,8 @@ server {
     include                 nginxconfig.io/security.conf;
 
     # logging
-    access_log              /var/log/nginx/example.com.access.log cloudflare;
-    error_log               /var/log/nginx/example.com.error.log warn;
+    access_log              /usr/local/nginx/logs/example.com.access.log cloudflare;
+    error_log               /usr/local/nginx/logs/example.com.error.log warn;
 
     # index.php
     index                   index.php;
@@ -64,7 +64,7 @@ server {
 
     location ^~ /.well-known/acme-challenge/ {
         default_type "text/plain";
-        root /usr/share/nginx/html/example.com/_letsencrypt;
+        root /usr/local/nginx/html/example.com/_letsencrypt;
     }
 
     location / {
