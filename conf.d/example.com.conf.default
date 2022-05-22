@@ -6,16 +6,17 @@ server {
     root                    $base/example.com;
 
     # SSL
+    include                 snippets/ssl_params.conf;
     ssl_certificate         /etc/letsencrypt/live/example.com/fullchain.pem;
     ssl_certificate_key     /etc/letsencrypt/live/example.com/privkey.pem;
     ssl_trusted_certificate /etc/letsencrypt/live/example.com/chain.pem;
 
     # security
-    include                 nginxconfig.io/security.conf;
+    include                 snippets/security.conf;
 
     # logging
-    access_log              /usr/local/nginx/logs/example.com.access.log cloudflare;
-    error_log               /usr/local/nginx/logs/example.com.error.log warn;
+    access_log              logs/example.com.access.log cloudflare;
+    error_log               logs/example.com.error.log warn;
 
     # index.php
     index                   index.php;
@@ -32,13 +33,13 @@ server {
     }
 
     # additional config
-    include nginxconfig.io/general.conf;
-    include nginxconfig.io/wordpress.conf;
+    include snippets/general.conf;
+    include snippets/wordpress.conf;
 
     # handle .php
     location ~ \.php$ {
         fastcgi_pass unix:/var/run/php/php-fpm.sock;
-        include      nginxconfig.io/php_fastcgi.conf;
+        include      snippets/php_fastcgi.conf;
         fastcgi_read_timeout 300;
     }
 }
@@ -50,9 +51,11 @@ server {
     server_name             www.example.com;
 
     # SSL
+    include                 snippets/ssl_params.conf;
     ssl_certificate         /etc/letsencrypt/live/example.com/fullchain.pem;
     ssl_certificate_key     /etc/letsencrypt/live/example.com/privkey.pem;
     ssl_trusted_certificate /etc/letsencrypt/live/example.com/chain.pem;
+
     return                  301 https://example.com$request_uri;
 }
 
